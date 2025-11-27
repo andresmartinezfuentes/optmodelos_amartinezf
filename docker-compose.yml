@@ -1,0 +1,21 @@
+services:
+  sd-tensorrt:
+    image: sd-tensorrt:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sd-tensorrt
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - HF_HOME=/app/.cache/huggingface
+      #- TRANSFORMERS_CACHE=/app/.cache/huggingface
+    volumes:
+      - ./cache:/app/.cache
+      - ./outputs:/app/outputs      # para guardar las imágenes generadas
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: bash
+
