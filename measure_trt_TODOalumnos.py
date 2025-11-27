@@ -411,9 +411,23 @@ def run_benchmark(
         #     - Cargar con ORTStableDiffusionPipeline.from_pretrained()
         #      pasando onnx_dir, provider y provider_options
         # ***** TO DO *****
+            provider = "CUDAExecutionProvider" if gpu_id is not None else "CPUExecutionProvider"
+            provider_options = {"device_id": gpu_id} if gpu_id is not None else None
 
-    
+            print(f"Cargando pipeline ONNX Runtime desde {onnx_dir} (provider={provider})...")
+            if onnx_dir is None:
+                raise ValueError("onnx_dir es requerido para backend 'onnxrt'")
 
+            # optimum.onnxruntime ORTStableDiffusionPipeline espera from_pretrained(dir, provider=..., provider_options=...)
+            # provider_options puede ser None o dict con opciones (p.ej. {"device_id": 0})
+            if provider_options is not None:
+                pipe = ORTStableDiffusionPipeline.from_pretrained(
+                    onnx_dir, provider=provider, provider_options=provider_options
+                )
+            else:
+                pipe = ORTStableDiffusionPipeline.from_pretrained(
+                    onnx_dir, provider=provider
+                )
         # ====================================================================
         # FASE DE WARMUP (calentar GPU y compilar kernels)
         # ====================================================================
