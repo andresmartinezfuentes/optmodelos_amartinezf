@@ -367,6 +367,14 @@ def run_benchmark(
         #    - Pasar: model_id, sampler, device, gpu_id, config.usefp16
         # 
         # ***** TO DO *****
+            print("Cargando pipeline PyTorch (baseline)...")
+            pipe = load_pipeline(
+                model_id=config.model_id,
+                sampler=config.sampler,
+                device=device,
+                gpu_id=gpu_id,
+                use_fp16=config.use_fp16
+            )
 
         elif config.backend == "trt":
         # B) Backend "trt":
@@ -375,6 +383,22 @@ def run_benchmark(
         #    - Forzar use_fp16=True en TensorRT (forzar último parámetro)
         #
         # ***** TO DO *****
+            print("Cargando pipeline PyTorch (solo text_encoder + VAE) para integracion con TRT...")
+            pipe = load_pipeline(
+                model_id=config.model_id,
+                sampler=config.sampler,
+                device=device,
+                gpu_id=gpu_id,
+                use_fp16=True  # forzamos fp16 para compatibilidad con el motor TRT
+            )
+
+            # Si quieres, desligar el UNet original del pipeline para evitar uso accidental.
+            try:
+                pipe.unet = None
+            except Exception:
+                # Si por compatibilidad no se puede, simplemente continuamos; run_trt_backend ignora pipe.unet.
+                pass
+
 
         elif config.backend == "onnxrt":
         # C) Backend "onnxrt":
